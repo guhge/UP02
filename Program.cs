@@ -1,8 +1,8 @@
-﻿class ComplexNumber
+class ComplexNumber
 {
     // Поля для действительной и мнимой частей
-    private double real;
-    private double imaginary;
+    private readonly double real;
+    private readonly double imaginary;
 
     // Конструктор
     public ComplexNumber(double real, double imaginary)
@@ -20,6 +20,10 @@
     // Метод для получения аргумента комплексного числа (в радианах)
     public double GetArgument()
     {
+        if (real == 0 && imaginary == 0)
+        {
+            return double.NaN;
+        }
         return Math.Atan2(imaginary, real);
     }
 
@@ -42,14 +46,19 @@
     }
 
     // Статический метод для создания комплексного числа из строки
-    public static ComplexNumber Parse(string input)
+    public static ComplexNumber FromString(string input)
     {
-        // Парсим строку в действительную и мнимую части
-        string[] parts = input.Split('+');
-        double realPart = double.Parse(parts[0]);
-        double imaginaryPart = double.Parse(parts[1].TrimEnd('i'));
-
-        return new ComplexNumber(realPart, imaginaryPart);
+        try
+        {
+            string[] parts = input.Split('+');
+            double realPart = double.Parse(parts[0].Trim());
+            double imaginaryPart = double.Parse(parts[1].Trim().TrimEnd('i'));
+            return new ComplexNumber(realPart, imaginaryPart);
+        }
+        catch (Exception)
+        {
+            throw new FormatException("Неверный формат строки. Ожидаемый формат: 'a + bi'");
+        }
     }
 }
 
@@ -68,7 +77,14 @@ class Program
         Console.WriteLine($"Разность: {difference}");
 
         string input = "5 + 2i";
-        ComplexNumber parsedNumber = ComplexNumber.Parse(input);
-        Console.WriteLine($"Парсинг строки: {parsedNumber}");
+        try
+        {
+            ComplexNumber parsedNumber = ComplexNumber.FromString(input);
+            Console.WriteLine($"Парсинг строки: {parsedNumber}");
+        }
+        catch (FormatException ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 }
